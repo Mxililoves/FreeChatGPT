@@ -10,6 +10,8 @@ import CrossIcon from '@icon/CrossIcon';
 
 import useSubmit from '@hooks/useSubmit';
 import DownloadChat from './DownloadChat';
+import CloneChat from './CloneChat';
+import ShareGPT from '@components/ShareGPT';
 
 const ChatContent = () => {
   const inputRole = useStore((state) => state.inputRole);
@@ -30,7 +32,9 @@ const ChatContent = () => {
       ? state.chats[state.currentChatIndex].messages.length
       : 0
   );
+  const advancedMode = useStore((state) => state.advancedMode);
   const generating = useStore.getState().generating;
+  const hideSideMenu = useStore((state) => state.hideSideMenu);
 
   const saveRef = useRef<HTMLDivElement>(null);
 
@@ -55,8 +59,10 @@ const ChatContent = () => {
             className='flex flex-col items-center text-sm dark:bg-gray-800 w-full'
             ref={saveRef}
           >
-            <ChatTitle />
-            {messages?.length === 0 && <NewMessageButton messageIndex={-1} />}
+            {advancedMode && <ChatTitle />}
+            {!generating && advancedMode && messages?.length === 0 && (
+              <NewMessageButton messageIndex={-1} />
+            )}
             {messages?.map((message, index) => (
               <React.Fragment key={index}>
                 <Message
@@ -64,7 +70,7 @@ const ChatContent = () => {
                   content={message.content}
                   messageIndex={index}
                 />
-                <NewMessageButton messageIndex={index} />
+                {!generating && advancedMode && <NewMessageButton messageIndex={index} />}
               </React.Fragment>
             ))}
           </div>
@@ -90,9 +96,19 @@ const ChatContent = () => {
               </div>
             </div>
           )}
-          <div className='mt-4'>
+          <div
+            className={`mt-4 w-full m-auto  ${
+              hideSideMenu
+                ? 'md:max-w-5xl lg:max-w-5xl xl:max-w-6xl'
+                : 'md:max-w-3xl lg:max-w-3xl xl:max-w-4xl'
+            }`}
+          >
             {useStore.getState().generating || (
-              <DownloadChat saveRef={saveRef} />
+              <div className='md:w-[calc(100%-50px)] flex gap-4 flex-wrap justify-center'>
+                <DownloadChat saveRef={saveRef} />
+                <ShareGPT />
+                <CloneChat />
+              </div>
             )}
           </div>
           <div className='w-full h-36'></div>
